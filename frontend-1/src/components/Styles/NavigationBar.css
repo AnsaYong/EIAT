@@ -1,0 +1,54 @@
+.navigation-bar {
+    width: 250px;
+    background-color: #34495e; /* Darker, more professional sidebar */
+    color: white;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.nav-item {
+    margin: 0;
+    padding: 10px 15px; /* Increased padding for more spacing */
+    border-bottom: 1px solid #3e607a; /* Subtle border color */
+}
+
+.nav-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.home-link {
+    font-weight: bold;
+    color: #2980b9; /* Subtle, muted blue */
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+}
+
+.home-link:hover {
+    color: #21618c; /* Darker hover color */
+    text-decoration: underline;
+}
+
+.nav-content {
+    padding: 10px 15px;
+    background-color: #3e607a; /* Slightly lighter than the background */
+}
+
+.nav-content a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    margin: 5px 0;
+    padding: 5px; /* Ensure uniform padding for all links */
+    border-radius: 3px;
+}
+
+.nav-content a:hover {
+    background-color: #3e607a; /* Subtle hover effect */
+    padding: 5px; /* Maintain consistent padding on hover */
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Slight hover shadow */
+}

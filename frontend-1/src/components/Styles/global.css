@@ -1,0 +1,21 @@
+:root {
+    --primary-color: #2a9d8f;
+    --secondary-color: #264653;
+    --accent-color: #e76f51;
+    --background-color: #f0f0f0;
+    --font-family: 'Arial, sans-serif';
+    --font-size-base: 16px;
+    --spacing-small: 8px;
+    --spacing-medium: 16px;
+    --spacing-large: 24px;
+    --border-radius: 4px;
+}
+
+/* Universal Styles */
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+}

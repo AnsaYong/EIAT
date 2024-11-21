@@ -1,0 +1,77 @@
+.project-list-container {
+    width: 400px;
+    height: 400px;
+    margin: auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.project-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.project-item {
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.project-item:hover {
+    background-color: #e2e6ea;
+}
+
+.project-item p {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+    color: #333;
+}
+
+.project-item span {
+    font-size: 14px;
+    color: #666;
+}
+
+.status-bar {
+    background-color: #007bff;
+    padding: 10px;
+    color: white;
+    text-align: center;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.project-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.project-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.project-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.project-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

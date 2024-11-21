@@ -1,0 +1,110 @@
+/* Menu Container holding both menu items and user settings */
+.menu-container {
+    display: flex;
+    justify-content: space-between; /* Spread out menu items and user settings */
+    align-items: center;
+    height: 30px; /* Increased height for better spacing */
+    background-color: #003366; /* Consistent dark blue color */
+    padding-bottom: 0.7em; /* Adjusted padding for better spacing */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adding slight shadow for a professional feel */
+}
+
+/* Menu Bar Container */
+.menu-bar 
+.user-settings{
+    display: flex;
+    align-items: center;
+    background-color: transparent; /* Make background transparent to match container */
+    /*padding: 0;*/ /* Removed padding for better alignment */
+}
+
+.menu-item {
+    background: none;
+    border: none;
+    color: #ffffff;
+    /*padding: 8px 12px;*/ /* Removed padding for better alignment */
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-right: 10px;
+    font-weight: 500; /* Slightly bolder for readability */
+}
+
+.menu-item:hover {
+    background-color: #0056b3; /* Hover color consistent with theme */
+    border-radius: 4px;
+    color: #ffffff;
+}
+
+/* User Settings (Settings and Username) */
+.settings-icon {
+    color: white;
+    font-size: 10px; /* Slightly larger for visibility */
+    margin-right: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    align-items: center; /* Align icon and text */
+}
+
+.settings-icon:hover {
+    color: #4CAF50; /* Hover effect for interaction */
+}
+
+.profile-icon {
+    color: white;
+    margin-right: 2px;
+    align-items: center; /* Align avatar and dropdown arrow */
+    cursor: pointer;
+}
+
+.profile-icon .MuiAvatar-root {
+    width: 25px;
+    height: 25px; /* Larger avatar for better balance */
+}
+
+.dropdown-arrow {
+    margin-left: 2px;
+    font-size: 10px; /* Adjust the size of the dropdown arrow */
+    color: white;
+}
+
+.MuiMenuItem-root {
+    font-size: 15px; /* Consistent font size */
+    padding: 10px 20px;
+    color: #333;
+}
+
+.MuiMenuItem-root:hover {
+    background-color: #f1f1f1; /* Light hover effect */
+}
+
+.MuiDivider-root {
+    background-color: #e0e0e0; /* Light color for divider */
+}
+
+/* Mobile view adjustments */
+@media (max-width: 768px) {
+    .menu-container {
+        padding: 0 15px;
+        height: 40px;
+    }
+
+    .menu-item {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+
+    .settings-icon {
+        font-size: 20px;
+        margin-right: 10px;
+    }
+
+    .profile-icon .MuiAvatar-root {
+        width: 30px;
+        height: 30px;
+    }
+
+    .dropdown-arrow {
+        font-size: 16px;
+    }
+}

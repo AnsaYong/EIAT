@@ -1,0 +1,27 @@
+.main-window {
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* Title bar, main content, footer */
+    height: 100vh;
+    background-color: var(--background-color);
+    overflow: hidden;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Sidebar and main content */
+    gap: var(--spacing-medium); /* Consistent spacing */
+    padding: var(--spacing-large);
+}
+
+.resizable-sidebar {
+    background-color: var(--secondary-color);
+    min-width: 250px;
+    max-width: 300px;
+    resize: horizontal;
+    overflow: auto;
+}
+
+.resizable-sidebar:hover {
+    background-color: var(--primary-color); /* Expand on hover */
+    transition: background-color 0.3s ease;
+}

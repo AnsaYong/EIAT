@@ -1,0 +1,58 @@
+.frequent-tools-panel {
+    position: fixed;
+    bottom: 50px; /* Adjust if footer height changes */
+    left: 0;
+    width: 200px;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    transition: width 0.3s, transform 0.3s;
+}
+
+.frequent-tools-panel.collapsed {
+    width: 50px;
+    transform: translateX(-200px);
+}
+
+.frequent-tools-panel h3 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.tools-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.tool-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.tool-item span {
+    margin-left: 10px;
+    color: #333;
+}
+
+.tool-item:hover {
+    background-color: #f0f0f0;
+}
+
+.tool-item svg {
+    color: #4CAF50;
+    font-size: 1.5rem;
+}
+
+.collapse-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color: #333;
+    font-size: 1.0rem;
+}

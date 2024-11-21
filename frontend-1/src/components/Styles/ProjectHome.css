@@ -1,0 +1,87 @@
+.project-home {
+    padding: 25px;
+    background-color: #ffffff; /* Keeping background consistent with a cleaner palette */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Softer shadow for a polished look */
+    max-width: 800px;
+    margin: 20px auto;
+    transition: box-shadow 0.3s ease; /* Adding subtle interaction */
+}
+
+.project-home:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15); /* Slight hover effect for depth */
+}
+
+.project-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.project-title {
+    font-size: 1.8rem;
+    color: #003366; /* Consistent color scheme */
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.project-description {
+    font-size: 1.1rem;
+    color: #666; /* Softer text for description */
+}
+
+.project-details {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.project-item {
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    color: #333;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0; /* Separator for cleaner layout */
+}
+
+.project-item:last-child {
+    border-bottom: none;
+}
+
+.project-item strong {
+    min-width: 150px;
+    font-weight: 600;
+    color: #0056b3; /* Adjusted to match the new color scheme */
+}
+
+.project-item span {
+    margin-left: 10px;
+    color: #555;
+}
+
+.project-icon {
+    color: #0056b3; /* Icons consistent with the color scheme */
+    margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+    .project-home {
+        padding: 15px;
+    }
+
+    .project-title {
+        font-size: 1.6rem;
+    }
+
+    .project-description {
+        font-size: 1rem;
+    }
+
+    .project-details {
+        gap: 15px;
+    }
+
+    .project-item {
+        font-size: 1rem;
+    }
+}

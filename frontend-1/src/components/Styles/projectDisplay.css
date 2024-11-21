@@ -1,0 +1,88 @@
+/* Common to all project content */
+h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 1rem;
+    color: #8d8989;
+}
+
+/* ProjectHome */
+.project-home {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* ScreeningCriteria, ScreeningResults,... */
+.project-screening h2,
+.project-scoping h2,
+.project-baseline h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #343a40;
+}
+
+.project-home p,
+.project-screening p,
+.project-scoping p,
+.project-baseline p {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.project-screening {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.project-screening h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.screening-info {
+    font-size: 16px;
+    color: #555;
+}
+
+.screening-info p {
+    margin: 10px 0;
+}
+
+.potential-impacts {
+    margin-top: 20px;
+}
+
+.potential-impacts h3 {
+    color: #444;
+    margin-bottom: 10px;
+}
+
+.potential-impacts ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.potential-impacts li {
+    padding: 5px 0;
+    font-size: 14px;
+}
+
+.potential-impacts li strong {
+    color: #0073e6;
+}
+
+.no-results {
+    font-style: italic;
+    color: #6c757d;
+}

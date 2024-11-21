@@ -1,0 +1,35 @@
+.footer-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f4f4f4;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+    z-index: 1;
+    flex-shrink: 0;
+}
+
+.status-section, .user-section, .notification-section {
+    display: flex;
+    align-items: center;
+    color: #333;
+}
+
+.status-icon, .notification-icon {
+    margin-right: 8px;
+    color: #4CAF50;
+    font-size: 1.5rem;
+}
+
+.notification-section span {
+    margin-left: 5px;
+}
+
+.footer-bar span {
+    font-size: 1rem;
+}
+

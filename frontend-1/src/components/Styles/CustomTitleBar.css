@@ -1,0 +1,77 @@
+/* Title Bar and Menu Bar Wrapper */
+.title-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    background-color: #2d3e50;
+}
+
+/* Title Bar Styles */
+.custom-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 35px; /* Set the height to 32px */
+    background-color: #2d3e50;
+    color: #fff;
+    padding: 0 10px;
+}
+
+.left-section {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 20px; /* Placeholder logo size */
+    margin-right: 10px;
+}
+
+.title {
+    font-size: 14px; /* Reduced font size for the title */
+    margin: 0;
+    flex-grow: 1;
+    color: #ffffff;
+}
+
+.title-bar-right {
+    display: flex;
+    align-items: center;
+}
+
+.quick-settings-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+    font-size: 12px; /* Adjusted for smaller title bar */
+}
+
+.window-controls {
+    display: flex;
+    align-items: center;
+}
+
+.control-icon {
+    color: #fff;
+    cursor: pointer;
+    padding: 0 8px;
+    font-size: 1.2rem;
+}
+
+.control-icon:hover {
+    background-color: #4CAF50;
+    border-radius: 3px;
+}
+
+.close-icon:hover {
+    background-color: #f44336; /* Red for close icon hover */
+}
+
+/* Separator Line between Menu Bar and Title Bar */
+.separator-line {
+    height: 1px; /* Thin line */
+    background-color: #1f2a38; /* Slightly lighter color to create subtle separation */
+    width: 100%;
+}
