@@ -68,7 +68,7 @@ class Project(models.Model):
     end_date = models.DateField(null=True, blank=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     manager = models.ForeignKey(
-        "authentication.CustomUser",
+        "user_management.User",
         on_delete=models.CASCADE,
         related_name="managed_projects",
     )  # Assigns the user as the project manager
@@ -111,7 +111,7 @@ class Project(models.Model):
     ecosystem_type = models.CharField(max_length=255, null=True, blank=True)
     # Team and stakeholders
     team_members = models.ManyToManyField(
-        "authentication.CustomUser", related_name="team_projects", blank=True
+        "user_management.User", related_name="team_projects", blank=True
     )
     stakeholders = models.JSONField(null=True, blank=True)
 
@@ -160,7 +160,7 @@ class UserRole(models.Model):
         ("reviewer", "Reviewer"),
         ("client", "Client"),
     ]
-    user = models.ForeignKey("authentication.CustomUser", on_delete=models.CASCADE)
+    user = models.ForeignKey("user_management.User", on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
 

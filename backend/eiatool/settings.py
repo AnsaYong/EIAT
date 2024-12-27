@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,11 +39,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Local apps
-    "authentication.apps.AuthenticationConfig",
+    "user_management.apps.UserManagementConfig",
     "core.apps.CoreConfig",
     "screening.apps.ScreeningConfig",
     # Third-party apps
     "rest_framework",
+    "rest_framework.authtoken",  # Required for Token Authentication
     "corsheaders",  # CORS headers to allow requests from frontend to backend during development
 ]
 
@@ -57,6 +59,56 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+# Cross-Origin Resource Sharing (CORS) settings
+# CORS_ORIGIN_ALLOW_ALL = True # Allow all origins for development OR
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# Django REST Framework Configuration
+REST_FRAMEWORK = {
+    # Default Authentication Classes
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",  # Token-based auth
+        "rest_framework.authentication.SessionAuthentication",  # For web-based sessions
+    ],
+    # Default Permission Classes
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",  # Requires authentication by default
+    ],
+    # Throttling (Optional)
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",  # Limit for anonymous users
+        "rest_framework.throttling.UserRateThrottle",  # Limit for authenticated users
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/day",  # 100 requests per day for anonymous users
+        "user": "1000/day",  # 1000 requests per day for authenticated users
+    },
+    # Pagination Settings (Optional)
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,  # Number of items per page
+    # Renderer Classes (for Browsable API or JSON responses)
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",  # Useful for debugging
+    ],
+}
+
+# Token Expiry Configuration (Optional)
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+
+# Authentication Backends (Ensure Django can authenticate with both username and email)
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",  # Default backend
 ]
 
 ROOT_URLCONF = "eiatool.urls"
@@ -132,11 +184,5 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Cross-Origin Resource Sharing (CORS) settings
-# CORS_ORIGIN_ALLOW_ALL = True # Allow all origins for development OR
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
-
 # Custom user model
-AUTH_USER_MODEL = "authentication.CustomUser"
+AUTH_USER_MODEL = "user_management.User"
