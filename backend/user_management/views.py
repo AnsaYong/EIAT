@@ -1,7 +1,12 @@
 from rest_framework import permissions, viewsets, status
 from rest_framework.response import Response
-from .models import User
-from .serializers import UserSerializer, RegisterSerializer
+from .models import User, SyncQueue, RoleChangeRequest
+from .serializers import (
+    UserSerializer,
+    RegisterSerializer,
+    SyncQueueSerializer,
+    RoleChangeRequestSerializer,
+)
 from .permissions import IsAdmin, IsProjectDeveloper, IsConsultant, IsRegulator
 
 
@@ -44,3 +49,45 @@ class RegisterViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class SyncQueueViewSet(viewsets.ModelViewSet):
+    """
+    A ViewSet for viewing and editing SyncQueue instances.
+    """
+
+    queryset = SyncQueue.objects.all()
+    serializer_class = SyncQueueSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        """
+        Customize permissions based on actions - dynamically adjusts permissions
+        based on the action.
+        """
+        if self.action == "list":
+            self.permission_classes = [permissions.IsAuthenticated, IsAdmin]
+        elif self.action in ["create", "update", "partial_update", "destroy"]:
+            self.permission_classes = [permissions.IsAuthenticated]
+        return super().get_permissions()
+
+
+class RoleChangeRequestViewSet(viewsets.ModelViewSet):
+    """
+    A ViewSet for viewing and editing RoleChangeRequest instances.
+    """
+
+    queryset = RoleChangeRequest.objects.all()
+    serializer_class = RoleChangeRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        """
+        Customize permissions based on actions - dynamically adjusts permissions
+        based on the action.
+        """
+        if self.action == "list":
+            self.permission_classes = [permissions.IsAuthenticated, IsAdmin]
+        elif self.action in ["create", "update", "partial_update", "destroy"]:
+            self.permission_classes = [permissions.IsAuthenticated]
+        return super().get_permissions()
