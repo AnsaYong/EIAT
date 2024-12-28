@@ -1,13 +1,20 @@
 from rest_framework import permissions, viewsets, status
 from rest_framework.response import Response
-from .models import User, SyncQueue, RoleChangeRequest
+from .models import Company, User, SyncQueue, RoleChangeRequest
 from .serializers import (
+    CompanySerializer,
     UserSerializer,
     RegisterSerializer,
     SyncQueueSerializer,
     RoleChangeRequestSerializer,
 )
 from .permissions import IsAdmin, IsProjectDeveloper, IsConsultant, IsRegulator
+
+
+class CompanyViewSet(viewsets.ModelViewSet):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
 
 class UserViewSet(viewsets.ModelViewSet):

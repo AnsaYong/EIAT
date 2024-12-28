@@ -9,11 +9,16 @@ class RoleBasedPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
+
+        # Restrict "pending" role
+        if user.project_role == "pending":
+            return False
+
         if not user.role_approved:
             return False  # User's role must be approved.
 
         # Get the user's permissions for the specified role
-        role_permissions = get_permissions_for_role(user.role)
+        role_permissions = get_permissions_for_role(user.project_role)
         action_type = view.action  # The action type (e.g., 'list', 'create', etc.)
         permission_type = request.method.lower()  # 'get', 'post', etc.
 
@@ -22,11 +27,14 @@ class RoleBasedPermission(permissions.BasePermission):
 
 
 # Specific role-based permissions
-
-
 class IsAdmin(RoleBasedPermission):
     def has_permission(self, request, view):
-        return request.user.role == "admin" and super().has_permission(request, view)
+        # Allow superusers to bypass the role-based permission
+        if request.user.is_superuser:
+            return True
+        return request.user.role == "project_admin" and super().has_permission(
+            request, view
+        )
 
 
 class IsProjectDeveloper(RoleBasedPermission):

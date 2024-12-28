@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Local apps
     "user_management.apps.UserManagementConfig",
+    "project.apps.ProjectConfig",
     "core.apps.CoreConfig",
     "screening.apps.ScreeningConfig",
     # Third-party apps

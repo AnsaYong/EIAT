@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import User, RoleChangeRequest, SyncQueue
+from .models import Company, User, RoleChangeRequest, SyncQueue
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ["id", "name", "created_at", "last_updated"]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -18,9 +24,9 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
-            "role",
+            "project_role",
             "organization_affiliation",
-            "organization_name",
+            "company",
             "designation",
             "is_offline",
             "last_synced_at",
@@ -33,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Ensures the role is valid and corresponds to a defined role.
         """
-        if value not in dict(User.ROLE_CHOICES):
+        if value not in dict(User.PROJECT_ROLE_CHOICES):
             raise serializers.ValidationError("Invalid role.")
         return value
 
@@ -61,9 +67,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             "last_name",
             "phone_number",
             "organization_affiliation",
-            "organization_name",
+            "company",
             "designation",
-            "role",
+            "project_role",
             "password",
             "password_confirmation",
         ]
@@ -80,11 +86,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         if data["password"] != data["password_confirmation"]:
             raise serializers.ValidationError("Passwords do not match.")
 
-        if not data.get("role"):
-            data["role"] = "public_stakeholder"  # Default role if none is provided
+        if not data.get("project_role"):
+            data["project_role"] = (
+                "public_stakeholder"  # Default role if none is provided
+            )
 
         # Check if the role is valid
-        if data["role"] not in dict(User.ROLE_CHOICES):
+        if data["project_role"] not in dict(User.PROJECT_ROLE_CHOICES):
             raise serializers.ValidationError("Invalid role selected.")
 
         return data
@@ -105,10 +113,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         # Create a role change request (if role needs approval or changes)
         if (
-            user.role != "public_stakeholder"
+            user.project_role != "public_stakeholder"
         ):  # Example logic: role change requests for non-public users
             RoleChangeRequest.objects.create(
-                user=user, requested_role=user.role, current_role="public_stakeholder"
+                user=user,
+                requested_role=user.project_role,
+                current_role="public_stakeholder",
             )
 
         return user
@@ -140,7 +150,7 @@ class RoleChangeRequestSerializer(serializers.ModelSerializer):
         """
         Ensures the requested role is valid.
         """
-        if value not in dict(User.ROLE_CHOICES):
+        if value not in dict(User.PROJECT_ROLE_CHOICES):
             raise serializers.ValidationError("Invalid requested role.")
         return value
 

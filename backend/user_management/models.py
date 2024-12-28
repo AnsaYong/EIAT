@@ -8,6 +8,24 @@ import uuid
 from django.utils import timezone
 
 
+class Company(models.Model):
+    """
+    Represents a company. Users must belong to a company to participate in projects.
+    """
+
+    name = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Company"
+        verbose_name_plural = "Companies"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class User(AbstractUser):
     """
     The User model represents all users in the system.
@@ -29,8 +47,9 @@ class User(AbstractUser):
         ("independent", "Independent Expert"),
     ]
 
-    ROLE_CHOICES = [
-        ("admin", "Admin"),
+    PROJECT_ROLE_CHOICES = [
+        ("pending", "Pending"),
+        ("project_admin", "Admin"),
         ("project_developer", "Project Developer"),
         ("consultant", "Consultant"),
         ("regulator", "Regulator"),
@@ -46,10 +65,16 @@ class User(AbstractUser):
     organization_affiliation = models.CharField(
         max_length=50, choices=ORGANIZATION_CHOICES, blank=True, null=True
     )
-    organization_name = models.CharField(max_length=100, blank=True, null=True)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="employees",
+    )
     designation = models.CharField(max_length=100, blank=True, null=True)
-    role = models.CharField(
-        max_length=50, choices=ROLE_CHOICES, null=False, default="public_stakeholder"
+    project_role = models.CharField(
+        max_length=50, choices=PROJECT_ROLE_CHOICES, null=False, default="pending"
     )
     is_offline = models.BooleanField(default=False)
     last_synced_at = models.DateTimeField(null=True, blank=True)
@@ -68,7 +93,7 @@ class User(AbstractUser):
             models.Index(fields=["email"]),
             models.Index(fields=["created_at"]),
             models.Index(fields=["user_id"]),
-            models.Index(fields=["role"]),
+            models.Index(fields=["project_role"]),
         ]
 
     def get_full_name(self):
@@ -80,7 +105,7 @@ class User(AbstractUser):
         )
 
     def get_role_display(self):
-        return dict(self.ROLE_CHOICES).get(self.role, "Unknown")
+        return dict(self.PROJECT_ROLE_CHOICES).get(self.project_role, "Unknown")
 
     def has_permission(self, action: str, permission_type: str = "view") -> bool:
         from .permissions import get_permissions_for_role
@@ -130,8 +155,8 @@ class RoleChangeRequest(models.Model):
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    requested_role = models.CharField(max_length=50, choices=User.ROLE_CHOICES)
-    current_role = models.CharField(max_length=50, choices=User.ROLE_CHOICES)
+    requested_role = models.CharField(max_length=50, choices=User.PROJECT_ROLE_CHOICES)
+    current_role = models.CharField(max_length=50, choices=User.PROJECT_ROLE_CHOICES)
     status = models.CharField(
         max_length=20,
         choices=[

@@ -25,7 +25,7 @@ def request_role_change(user: User, new_role: str):
     :param new_role: The new role the user is requesting.
     """
     request = RoleChangeRequest.objects.create(
-        user=user, requested_role=new_role, current_role=user.role
+        user=user, requested_role=new_role, current_role=user.project_role
     )
     return request
 

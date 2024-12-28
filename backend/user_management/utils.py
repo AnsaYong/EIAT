@@ -5,7 +5,7 @@ def get_permissions_for_role(role):
     :return: A dictionary of permissions for the specified role.
     """
     role_permissions = {
-        "admin": {
+        "project_admin": {
             "view": ["manage_users", "manage_projects", "view_all"],
             "edit": ["edit_all"],
             "delete": ["delete_all"],

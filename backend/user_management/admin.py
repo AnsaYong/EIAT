@@ -7,15 +7,16 @@ from .models import User, SyncQueue, RoleChangeRequest
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
+        "username",
         "get_full_name",
         "email",
-        "role",
+        "project_role",
         "role_approved",
         "created_at",
         "last_updated",
     )
     search_fields = ("email", "first_name", "last_name")
-    list_filter = ("role", "role_approved")
+    list_filter = ("project_role", "role_approved")
 
 
 @admin.register(SyncQueue)
