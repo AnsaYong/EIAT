@@ -108,7 +108,7 @@ class User(AbstractUser):
         return dict(self.PROJECT_ROLE_CHOICES).get(self.project_role, "Unknown")
 
     def has_permission(self, action: str, permission_type: str = "view") -> bool:
-        from .permissions import get_permissions_for_role
+        from .utils import get_permissions_for_role
 
         """
         Checks if the user has a specific action permission, with an optional permission type.
@@ -119,7 +119,7 @@ class User(AbstractUser):
         if not self.role_approved:
             return False
 
-        role_permissions = get_permissions_for_role(self.role)
+        role_permissions = get_permissions_for_role(self.project_role)
         return action in role_permissions.get(permission_type, [])
 
     def approve_role(self):

@@ -1,4 +1,11 @@
-def get_permissions_for_role(role):
+"""
+This module contains utility functions for user management.
+"""
+
+from typing import Dict, List
+
+
+def get_permissions_for_role(role: str) -> Dict[str, List[str]]:
     """
     Retrieves the permissions for a given role.
     :param role: The role for which permissions are needed.
