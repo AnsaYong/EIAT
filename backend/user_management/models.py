@@ -74,7 +74,7 @@ class User(AbstractUser):
     )
     designation = models.CharField(max_length=100, blank=True, null=True)
     project_role = models.CharField(
-        max_length=50, choices=PROJECT_ROLE_CHOICES, null=False, default="pending"
+        max_length=50, choices=PROJECT_ROLE_CHOICES, null=False
     )
     is_offline = models.BooleanField(default=False)
     last_synced_at = models.DateTimeField(null=True, blank=True)
@@ -134,6 +134,7 @@ class User(AbstractUser):
 
 
 class SyncQueue(models.Model):
+    # TODO: Maybe redundant if we use Electron for offline sync
     """
     The SyncQueue model represents the queue of sync requests made by users.
     """
