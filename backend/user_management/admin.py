@@ -1,7 +1,13 @@
 """Registers models for the Django admin interface."""
 
 from django.contrib import admin
-from .models import User, SyncQueue, RoleChangeRequest
+from .models import Company, User, RoleChangeRequest
+
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ("name", "created_at", "last_updated")
+    search_fields = ("name",)
 
 
 @admin.register(User)
@@ -10,19 +16,12 @@ class UserAdmin(admin.ModelAdmin):
         "username",
         "get_full_name",
         "email",
-        "project_role",
         "role_approved",
         "created_at",
         "last_updated",
     )
     search_fields = ("email", "first_name", "last_name")
-    list_filter = ("project_role", "role_approved")
-
-
-@admin.register(SyncQueue)
-class SyncQueueAdmin(admin.ModelAdmin):
-    list_display = ("user", "action_type", "status", "created_at")
-    list_filter = ("status",)
+    # list_filter = ("role_approved")
 
 
 @admin.register(RoleChangeRequest)

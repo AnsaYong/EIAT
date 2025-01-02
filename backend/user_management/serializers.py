@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Company, User, RoleChangeRequest, SyncQueue
+from .models import Company, User, RoleChangeRequest
+from constants import PROJECT_ROLE_CHOICES
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -24,10 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
-            "project_role",
             "organization_affiliation",
             "company",
-            "designation",
             "is_offline",
             "last_synced_at",
             "role_approved",
@@ -39,7 +38,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Ensures the role is valid and corresponds to a defined role.
         """
-        if value not in dict(User.PROJECT_ROLE_CHOICES):
+        if value not in dict(PROJECT_ROLE_CHOICES):
             raise serializers.ValidationError("Invalid role.")
         return value
 
@@ -68,8 +67,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             "phone_number",
             "organization_affiliation",
             "company",
-            "designation",
-            "project_role",
             "password",
             "password_confirmation",
         ]
@@ -85,15 +82,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         """
         if data["password"] != data["password_confirmation"]:
             raise serializers.ValidationError("Passwords do not match.")
-
-        if not data.get("project_role"):
-            data["project_role"] = (
-                "public_stakeholder"  # Default role if none is provided
-            )
-
-        # Check if the role is valid
-        if data["project_role"] not in dict(User.PROJECT_ROLE_CHOICES):
-            raise serializers.ValidationError("Invalid role selected.")
 
         return data
 
@@ -111,77 +99,51 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)  # Hash password before saving
         user.save()
 
-        # Create a role change request (if role needs approval or changes)
-        if (
-            user.project_role != "public_stakeholder"
-        ):  # Example logic: role change requests for non-public users
-            RoleChangeRequest.objects.create(
-                user=user,
-                requested_role=user.project_role,
-                current_role="public_stakeholder",
-            )
-
         return user
 
 
 class RoleChangeRequestSerializer(serializers.ModelSerializer):
     """
-    Serializes the RoleChangeRequest model.
-    Includes all fields in the RoleChangeRequest model.
-
-    Methods:
-        - validate_requested_role: Ensures the requested role is valid.
+    Serializes RoleChangeRequest model with auto-populated fields.
     """
+
+    def get_project_queryset():
+        from project.models import Project
+
+        return Project.objects.all()
+
+    project = serializers.PrimaryKeyRelatedField(queryset=get_project_queryset())
+    requested_role = serializers.ChoiceField(choices=PROJECT_ROLE_CHOICES)
 
     class Meta:
         model = RoleChangeRequest
         fields = [
             "user",
+            "project",
             "requested_role",
             "current_role",
-            "status",
-            "requested_at",
-            "approved_at",
-            "rejected_at",
             "comments",
         ]
+        read_only_fields = ["user", "current_role"]
 
-    def validate_requested_role(self, value):
+    def validate_requested_role(self, project):
         """
-        Ensures the requested role is valid.
+        Ensure the user is associated with the selected project.
         """
-        if value not in dict(User.PROJECT_ROLE_CHOICES):
-            raise serializers.ValidationError("Invalid requested role.")
-        return value
+        user = self.context["request"].user
+        if not user.is_associated_with_project(project):
+            raise serializers.ValidationError("You are not part of this project.")
+        return project
 
-
-class SyncQueueSerializer(serializers.ModelSerializer):
-    """
-    Serializes the SyncQueue model.
-    Includes all fields in the SyncQueue model.
-
-    Methods:
-        - validate_action_type: Ensures the action type is valid.
-        - validate_data: Ensures data is in the correct format.
-    """
-
-    class Meta:
-        model = SyncQueue
-        fields = ["user", "action_type", "data_type", "data", "status", "created_at"]
-
-    def validate_action_type(self, value):
+    def create(self, validated_data):
         """
-        Ensures the action type is valid.
+        Populates the user field and validates the current role.
         """
-        valid_actions = ["create", "update", "delete"]  # Example action types
-        if value not in valid_actions:
-            raise serializers.ValidationError("Invalid action type.")
-        return value
+        user = self.context["request"].user
+        validated_data["user"] = user
 
-    def validate_data(self, value):
-        """
-        Ensure data is in the correct format (optional validation).
-        """
-        if not isinstance(value, dict):
-            raise serializers.ValidationError("Data must be a dictionary.")
-        return value
+        # Dynamically populate the current role
+        validated_data["current_role"] = user.get_current_role(
+            validated_data["project"]
+        )
+        return super().create(validated_data)

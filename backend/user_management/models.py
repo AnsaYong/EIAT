@@ -1,16 +1,20 @@
 """
-Contains all model definitions (User, SyncQueue, RoleChangeRequest).
+Provides all model definitions related to user managament.
 """
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import uuid
 from django.utils import timezone
+from permissions import user_has_permission
+from utils import get_current_role
+from constants import PROJECT_ROLE_CHOICES, ORGANIZATION_CHOICES
 
 
 class Company(models.Model):
     """
-    Represents a company. Users must belong to a company to participate in projects.
+    Represents a company. Users must belong to a company to participate
+    in projects - mainly for collaboration between different roles.
     """
 
     name = models.CharField(max_length=255, unique=True)
@@ -31,31 +35,13 @@ class User(AbstractUser):
     The User model represents all users in the system.
 
     Methods:
-        get_full_name: Returns the full name of the user.
-        get_organization_display: Returns the organization affiliation of the user.
-        get_role_display: Returns the role of the user.
-        has_permission: Checks if the user has a specific action permission.
-        approve_role: Approves the role of the user.
-        sync_data: Syncs the data of the user.
+        - get_full_name: Returns the full name of the user.
+        - get_organization_display: Returns the display value of the organization affiliation.
+        - has_permission: Checks if the user has a specific action permission.
+        - approve_role: Approves the user's role in a project (triggered externally).
+        - sync_data: Syncs the user's data with the server.
+        - notify: Sends a notification to the user.
     """
-
-    ORGANIZATION_CHOICES = [
-        ("gov", "Government"),
-        ("ngo", "Non-Governmental Organization"),
-        ("consult", "Consulting Firm"),
-        ("public", "Public Stakeholder"),
-        ("independent", "Independent Expert"),
-    ]
-
-    PROJECT_ROLE_CHOICES = [
-        ("pending", "Pending"),
-        ("project_admin", "Admin"),
-        ("project_developer", "Project Developer"),
-        ("consultant", "Consultant"),
-        ("regulator", "Regulator"),
-        ("public_stakeholder", "Public Stakeholder"),
-        ("independent_expert", "Independent Expert"),
-    ]
 
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
@@ -72,10 +58,6 @@ class User(AbstractUser):
         null=True,
         related_name="employees",
     )
-    designation = models.CharField(max_length=100, blank=True, null=True)
-    project_role = models.CharField(
-        max_length=50, choices=PROJECT_ROLE_CHOICES, null=False
-    )
     is_offline = models.BooleanField(default=False)
     last_synced_at = models.DateTimeField(null=True, blank=True)
     role_approved = models.BooleanField(default=False)
@@ -84,7 +66,7 @@ class User(AbstractUser):
 
     def __str__(self):
         role_status = "Approved" if self.role_approved else "Pending Approval"
-        return f"{self.get_full_name()} ({self.get_role_display()} - {role_status})"
+        return f"{self.get_full_name()} (Project Role Status - {role_status})"
 
     class Meta:
         verbose_name = "User"
@@ -93,61 +75,45 @@ class User(AbstractUser):
             models.Index(fields=["email"]),
             models.Index(fields=["created_at"]),
             models.Index(fields=["user_id"]),
-            models.Index(fields=["project_role"]),
         ]
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
 
     def get_organization_display(self):
-        return dict(self.ORGANIZATION_CHOICES).get(
-            self.organization_affiliation, "Unknown"
-        )
+        return dict(ORGANIZATION_CHOICES).get(self.organization_affiliation, "Unknown")
 
-    def get_role_display(self):
-        return dict(self.PROJECT_ROLE_CHOICES).get(self.project_role, "Unknown")
-
-    def has_permission(self, action: str, permission_type: str = "view") -> bool:
-        from .utils import get_permissions_for_role
-
+    def has_permission(
+        self, action: str, permission_type: str = "view", project=None
+    ) -> bool:
         """
-        Checks if the user has a specific action permission, with an optional permission type.
-        :param action: The action the user is trying to perform.
-        :param permission_type: The type of permission (e.g., 'view', 'edit', 'delete').
-        :return: True if the user has the permission; otherwise, False.
+        Checks if the user has a specific permission using the centralized logic.
         """
-        if not self.role_approved:
-            return False
-
-        role_permissions = get_permissions_for_role(self.project_role)
-        return action in role_permissions.get(permission_type, [])
+        return user_has_permission(self, action, permission_type, project)
 
     def approve_role(self):
+        """
+        Updates the user's role status to approved when called during role approval.
+        """
         self.role_approved = True
         self.save()
 
     def sync_data(self):
+        """
+        Syncs the user's data with the server.
+        """
         if self.is_offline:
             self.last_synced_at = timezone.now()
             self.is_offline = False
             self.save()
 
-
-class SyncQueue(models.Model):
-    # TODO: Maybe redundant if we use Electron for offline sync
-    """
-    The SyncQueue model represents the queue of sync requests made by users.
-    """
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    action_type = models.CharField(max_length=50)
-    data_type = models.CharField(max_length=50)
-    data = models.JSONField()
-    status = models.CharField(max_length=20, default="pending")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.get_full_name()} - {self.action_type} - {self.data_type}"
+    def notify(self, message):
+        """
+        Send a notification to the user.
+        """
+        # Example implementation for email notification
+        # send_email(self.email, "Project Notification", message)
+        pass
 
 
 class RoleChangeRequest(models.Model):
@@ -155,16 +121,20 @@ class RoleChangeRequest(models.Model):
     Tracks the role change requests made by users, as well as their status.
     """
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    requested_role = models.CharField(max_length=50, choices=User.PROJECT_ROLE_CHOICES)
-    current_role = models.CharField(max_length=50, choices=User.PROJECT_ROLE_CHOICES)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="role_change_requests"
+    )
+    project = models.ForeignKey(
+        "project.Project",
+        on_delete=models.CASCADE,
+        related_name="role_change_requests_project",
+    )
+    requested_role = models.CharField(max_length=50, choices=PROJECT_ROLE_CHOICES)
+    current_role = models.CharField(
+        max_length=50, choices=PROJECT_ROLE_CHOICES, blank=False, null=False
+    )
     status = models.CharField(
         max_length=20,
-        choices=[
-            ("pending", "Pending"),
-            ("approved", "Approved"),
-            ("rejected", "Rejected"),
-        ],
         default="pending",
     )
     requested_at = models.DateTimeField(auto_now_add=True)
@@ -173,4 +143,15 @@ class RoleChangeRequest(models.Model):
     comments = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Role Change Request for {self.user.get_full_name()} - {self.status}"
+        return f"Role Change Request for {self.user.get_full_name()} in {self.project.name} - {self.status}"
+
+    def save(self, *args, **kwargs):
+        """
+        Validates current role before saving.
+        """
+        if not self.pk:  # Only validate for new records
+            current_role = get_current_role(self.user, self.project)
+            if current_role == self.requested_role:
+                raise ValueError("Requested role is already assigned.")
+            self.current_role = current_role or "unknown"
+        super().save(*args, **kwargs)

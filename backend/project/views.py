@@ -1,10 +1,15 @@
-from rest_framework import viewsets, permissions
+from django.db import models
+from rest_framework import status, viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .models import Project, ProjectUserRole
-from .serializers import ProjectSerializer, ProjectUserRoleSerializer
-from user_management.permissions import RoleBasedPermission
+from .models import Project, ProjectUserRole, ProjectUserRoleRequest
+from .serializers import (
+    ProjectSerializer,
+    ProjectUserRoleSerializer,
+    ProjectUserRoleRequestSerializer,
+)
 import logging
+from permissions import IsAdmin
 
 # Set up audit logging
 auditor = logging.getLogger("audit")
@@ -21,86 +26,88 @@ class ProjectViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = ProjectSerializer
-    permission_classes = [permissions.IsAuthenticated, RoleBasedPermission]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
-        Restrict the queryset to projects the user is associated with.
+        Restrict the queryset to projects in which the user is project admin.
         """
         user = self.request.user
         if user.is_superuser:
             return Project.objects.all()
-        # Filter projects by user association
-        return Project.objects.filter(projectuserrole__user=user)
+        return Project.objects.filter(
+            models.Q(project_admin=user) | models.Q(created_by=user)
+        )
 
     def perform_create(self, serializer):
         """
         Save the project with the creator and log the action.
         """
-        project = serializer.save(created_by=self.request.user)
+        project = serializer.save()
         auditor.info(f"User {self.request.user.email} created project {project.name}.")
 
     def destroy(self, request, *args, **kwargs):
         """
-        Add audit logging for project deletions.
+        Deletes a project and adds audit logging for project deletions.
         """
         project = self.get_object()
         response = super().destroy(request, *args, **kwargs)
         auditor.info(f"User {request.user.email} deleted project {project.name}.")
         return response
 
-    @action(detail=True, methods=["get"])
-    def users(self, request, pk=None):
-        """
-        Custom action to list users associated with a project.
-        """
-        project = self.get_object()
-        roles = ProjectUserRole.objects.filter(project=project)
-        serializer = ProjectUserRoleSerializer(roles, many=True)
-        return Response(serializer.data)
 
-
-class ProjectUserRoleViewSet(viewsets.ModelViewSet):
+class ProjectUserRoleRequestViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for managing project user roles.
+    Handles user requests to join projects with specific roles.
     """
 
-    serializer_class = ProjectUserRoleSerializer
-    permission_classes = [permissions.IsAuthenticated, RoleBasedPermission]
+    serializer_class = ProjectUserRoleRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
-        Restrict the queryset to roles related to the user's projects.
+        Only show requests made by the logged-in user.
         """
-        user = self.request.user
-        if user.is_superuser:
-            return ProjectUserRole.objects.all()
-        # Filter roles by user's associated projects
-        return ProjectUserRole.objects.filter(project__projectuserrole__user=user)
+        return ProjectUserRoleRequest.objects.filter(user=self.request.user)
 
-    def perform_create(self, serializer):
+
+class ProjectUserRoleApprovalViewSet(viewsets.ModelViewSet):
+    """
+    Handles admin approval of project role requests.
+    """
+
+    serializer_class = ProjectUserRoleSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+    def get_queryset(self):
         """
-        Add audit logging for role creation.
+        Show only requests for projects where the user is an admin.
         """
-        role = serializer.save()
-        auditor.info(
-            f"User {self.request.user.email} assigned role {role.role} "
-            f"to user {role.user.email} in project {role.project.name}."
+        return ProjectUserRoleRequest.objects.filter(
+            project__project_admin=self.request.user
         )
 
-    def destroy(self, request, *args, **kwargs):
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
         """
-        Add audit logging for role deletions.
+        Approve a role request and create a ProjectUserRole record.
         """
-        role = self.get_object()
-        response = super().destroy(request, *args, **kwargs)
-        auditor.info(
-            f"User {self.request.user.email} removed role {role.role} "
-            f"from user {role.user.email} in project {role.project.name}."
+        role_request = self.get_object()
+        ProjectUserRole.objects.create(
+            user=role_request.user,
+            project=role_request.project,
+            role=role_request.requested_role,
         )
-        return response
+        role_request.delete()
+        return Response(
+            {"detail": "Role approved successfully."}, status=status.HTTP_200_OK
+        )
 
-
-# TODO:
-# Test the views thoroughly to ensure the filtering, permissions, and audit logging work as expected.
-# Consider adding pagination and rate limiting for better scalability and security.
+    @action(detail=True, methods=["post"])
+    def reject(self, request, pk=None):
+        """
+        Reject a role request by deleting it.
+        """
+        role_request = self.get_object()
+        role_request.delete()
+        return Response({"detail": "Role request rejected."}, status=status.HTTP_200_OK)
