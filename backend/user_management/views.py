@@ -1,9 +1,10 @@
 import logging
 from django.utils import timezone
+from django.contrib.auth import authenticate, login, logout
 from rest_framework import permissions, viewsets, status
 from rest_framework.response import Response
-from rest_framework.decorators import action, api_view
-from django.contrib.auth import authenticate, login, logout
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 from .models import Company, User, RoleChangeRequest
 from project.models import ProjectUserRole
@@ -42,9 +43,11 @@ def error_response(message, status_code):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def login_user(request):
     """
     Handle user login. Returns token on success.
+    Also overrrides the default permission for all views specified by the TokenAuthentication class in settings.py.
     """
     username = request.data.get("username")
     password = request.data.get("password")

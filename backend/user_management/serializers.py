@@ -64,6 +64,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
+            "username",
             "phone_number",
             "organization_affiliation",
             "company",
@@ -74,6 +75,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "email": {"required": True},
             "first_name": {"required": True},
             "last_name": {"required": True},
+            "username": {"required": True},
         }
 
     def validate(self, data):

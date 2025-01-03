@@ -76,27 +76,44 @@ class ProjectUserRoleApprovalViewSet(viewsets.ModelViewSet):
     Handles admin approval of project role requests.
     """
 
-    serializer_class = ProjectUserRoleSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    serializer_class = ProjectUserRoleRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
-        Show only requests for projects where the user is an admin.
+        Return role requests for projects managed by the current user.
         """
         return ProjectUserRoleRequest.objects.filter(
             project__project_admin=self.request.user
         )
+
+    def list(self, request):
+        """
+        List pending role requests for projects managed by the current admin.
+        """
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
         """
         Approve a role request and create a ProjectUserRole record.
         """
-        role_request = self.get_object()
+        try:
+            role_request = ProjectUserRoleRequest.objects.get(
+                id=pk, project__project_admin=request.user
+            )
+        except ProjectUserRoleRequest.DoesNotExist:
+            return Response(
+                {"detail": "Role request not found or not authorized."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         ProjectUserRole.objects.create(
             user=role_request.user,
             project=role_request.project,
-            role=role_request.requested_role,
+            role=role_request.project_role,
         )
         role_request.delete()
         return Response(
@@ -108,6 +125,15 @@ class ProjectUserRoleApprovalViewSet(viewsets.ModelViewSet):
         """
         Reject a role request by deleting it.
         """
-        role_request = self.get_object()
+        try:
+            role_request = ProjectUserRoleRequest.objects.get(
+                id=pk, project__project_admin=request.user
+            )
+        except ProjectUserRoleRequest.DoesNotExist:
+            return Response(
+                {"detail": "Role request not found or not authorized."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         role_request.delete()
         return Response({"detail": "Role request rejected."}, status=status.HTTP_200_OK)

@@ -73,7 +73,7 @@ CORS_ALLOW_CREDENTIALS = True
 REST_FRAMEWORK = {
     # Default Authentication Classes
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",  # Token-based auth
+        "rest_framework.authentication.TokenAuthentication",  # Token-based: default permission for all views
         "rest_framework.authentication.SessionAuthentication",  # For web-based sessions
     ],
     # Default Permission Classes

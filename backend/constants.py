@@ -15,7 +15,6 @@ ORGANIZATION_CHOICES = [
 ]
 
 PROJECT_ROLE_CHOICES = [
-    ("project_admin", "Admin"),
     ("project_developer", "Project Developer"),
     ("consultant", "Consultant"),
     ("regulator", "Regulator"),

@@ -14,7 +14,7 @@ router.register(
     basename="project-role-request",
 )
 router.register(
-    r"project-role_approval", ProjectUserRoleApprovalViewSet, basename="project-role"
+    r"project-role-approval", ProjectUserRoleApprovalViewSet, basename="project-role"
 )
 
 urlpatterns = [

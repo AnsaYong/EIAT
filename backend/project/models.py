@@ -12,6 +12,12 @@ class Project(models.Model):
     project_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(
+        "user_management.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="created_projects",
+    )
     project_admin = models.ForeignKey(
         "user_management.User",
         on_delete=models.SET_NULL,
@@ -22,13 +28,10 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     company = models.ForeignKey(
-        "user_management.Company", on_delete=models.CASCADE, related_name="projects"
-    )
-    created_by = models.ForeignKey(
-        "user_management.User",
-        on_delete=models.SET_NULL,
+        "user_management.Company",
+        on_delete=models.CASCADE,
         null=True,
-        related_name="created_projects",
+        related_name="projects",
     )
 
     def project_updated(self):
@@ -75,7 +78,7 @@ class ProjectUserRoleRequest(models.Model):
 
 class ProjectUserRole(models.Model):
     """
-    Tracks approved roles for users in projects.
+    Links users to projects with approved roles.
     """
 
     user = models.ForeignKey(
